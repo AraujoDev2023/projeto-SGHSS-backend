@@ -5,6 +5,7 @@ import { connectDB } from './src/config/db.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import path from 'path';
+import userRouter from "./src/routes/userRoute.js"
 
 // Carregando variáveis de ambiente
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +21,8 @@ app.use(express.urlencoded( { extended: true }));
 
 // Conectar ao Banco de Dado
 connectDB();
+
+app.use("/api", userRouter);
 
 // Iniciando Servidor
 app.listen(PORT, () => console.log(`Servidor rodando!`));
