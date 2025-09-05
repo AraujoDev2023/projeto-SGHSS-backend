@@ -1,5 +1,0 @@
-# Dependências
-node_modules/
-
-# Arquivo de variáveis de ambiente
-src/config/.env
