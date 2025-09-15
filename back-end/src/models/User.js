@@ -1,7 +1,7 @@
-import validator from "validator";
-import crypto from 'crypto';
+import { pool } from '../config/db.js';
+import crypto, { hash } from 'crypto';
 import bcrypt from 'bcrypt';
-import { pool } from "../config/db.js";
+
 
 // Classe Usuario
 export default class User {
@@ -9,14 +9,16 @@ export default class User {
     #email
     #password
     #id 
-    #typeUser  
+    #typeUser
+    #phone  
 
-    constructor(fullName, email, password, typeUser, id = null) {
+    constructor(fullName, email, password, typeUser, phone, id = null) {
         this.#fullName = fullName;
         this.#email = email;
         this.#password = password;
         this.#typeUser = typeUser;
-        this.#id = id
+        this.#phone = phone;
+        this.#id = id;
     }
 
     //getters
@@ -25,13 +27,11 @@ export default class User {
     get email() { return this.#email; }
     get password() { return this.#password; }
     get typeUser() { return this.#typeUser; }
-
-    // Setter com validações
-    set email(value) {
-        if (!validator.isEmail(value)) {
-            throw new Error("Email inválido!");
-        }
-        this.#email = value;
+    get phone() { return this.#phone; }
+    
+    // Setter
+    set id(value) {
+        this.#id = value;
     }
     
     set password(value) {
@@ -41,10 +41,29 @@ export default class User {
         this.#password = value;
     }
 
-    // Hashing senha
-    async hashPassword() {
-        this.#password = await bcrypt.hash(this.#password, 10);
+    async saveUser(conn) {
+        const [result] = await conn.query(
+                `INSERT INTO users (fullName, email, passw, typeUser, phone) VALUES (?,?,?,?,?)`,
+                [this.fullName, this.email, this.password, this.typeUser, this.phone]
+            );
+            this.id = result.insertId;
+            return this.id;
     }
-    
-   
-}
+
+    static async getByEmail(email) {
+        const [rows] = await pool.query(
+            `SELECT
+            userId, 
+            fullName, 
+            email, 
+            passw, 
+            typeUser, 
+            must_change_password, 
+            phone 
+            FROM users WHERE email = ?`,
+            [email]
+        );
+        return rows[0] || null;
+    }
+
+};

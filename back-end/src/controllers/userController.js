@@ -1,11 +1,11 @@
 import { pool } from "../config/db.js";
 import User from "../models/User.js";
 import Patient from "../models/Patient.js";
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-import validator from 'validator';
-import { error } from "console";
-import { format, parse } from "path";
+import {emailValidation} from "../utils/valid.js";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import Professional from "../models/Professional.js";
+import Admin from "../models/Adm.js";
 
 
 // Variáveis
@@ -14,129 +14,160 @@ const userAdmin = "ADMIN";
 const userProfessinal = "PROFISSIONAL";
 
 
-//---------------------------- Funções ---------------------------------------//
-
-
-// Função gerar senha temporaria
-async function generateTempPassword(length = 12) {
-    const buf = crypto.randomBytes(Math.ceil(length * 0.75));
-    return buf.toString("base64")
-        .replace(/\+/g, "0")
-        .replace(/\//g, "0")
-        .slice(0, length);
-}
-
-// Função para criptografia da senha
-async function hashPassword(password) {
-    console.log(password);
-    try {
-        const hash = await bcrypt.hash(password, 10);
-        return hash;
-    } catch (err) {
-        return err;
-    }
-}
-
-// Função para validar email
-async function emailValidation(email) {
-    if (!validator.isEmail(email)) {
-        throw new Error("Email inválido!");
-    }
-    return email;
-}
-
 //----------------- Criar e salvar usuários no DB ----------------------------//
 
 // Criar novo usuário
 export const createUser = async (req, res) => {
-    const connct = await pool.getConnection(); // Inicia conexão para transação
-    await connct.beginTransaction();
+    const conn = await pool.getConnection(); // Inicia conexão para transação
 
     try {
+        await conn.beginTransaction();
+
         const data = req.body;
-                
-        const tempPassword = await generateTempPassword(); // Gerar senha temporaria
 
-        // Criptografando a senha
-        const passwordHash = await hashPassword(tempPassword);
-        console.log(passwordHash);
-
-        const emailUser = await emailValidation(data.email); // validar email
-        
-        // Verificação se os campos obricatorios estão preenchidos
-        if (!emailUser || !data.fullName || !data.typeUser) {
+        if (!data.email || !data.fullName || !data.typeUser || !data.phone) {
             return res.status(400).json({ error: "Compos obrigatórios apreencher!" });
-
-        } else {
-             // Salvar usuário no banco de dados 
-            const [result] = await connct.execute(
-                `INSERT INTO users (fullName, email, passw, typeUser) VALUES (?,?,?,?)`,
-                [data.fullName, data.email, passwordHash, data.typeUser]
-            );
-            console.log("Gravou user");
-                   
-            // Pegar ID automatico do usuário
-            const userId = result.insertId;
-           
-            // Converter dado do tipo de usuário em STRING e deixar em letre maiusculas
-            const typeUser = String(data.typeUser).toUpperCase();
-
-            // Verificar se tipo de usuário e usuário Paciente e se os compos obrigatorios estão preenchido
-            if (typeUser === userPatient) {
-                if (!data.gender || !data.dateBirth || !data.cpf) {
-                    return res.status(400).json({ error: "Compos obrigatórios apreencher!" });
-                }
-                try {
-                      // Salvar usuário Paciente no DB
-                    await connct.execute(
-                        `INSERT INTO patient (userId, cpf, phone, gender, address, dateBirth) VALUES (?,?,?,?,?,?)`,
-                        [userId, data.cpf, data.phone, data.gender, data.address, data.dateBirth]                        
-                );
-                console.log("Gravou apciente");
-
-
-                } catch (err) {
-                    return res.status(400).json({ error: "Erro ao gravar dados na tabela Paciente!"});
-                }
-            }
-
-            // Verificar se tipo de usuário e usuário Admin
-            else if (typeUser === userAdmin) {
-                try {
-                    await connct.execute(
-                        `INSERT INTO admin_profe (userId, can_manage_users, can_manage_reports, can_manage_system) VALUES (?,?,?,?)`,
-                        [userId, data.manage_users, data.manage_reports, data.manage_system]
-                    );
-                } catch (err) {
-                    return res.status(400).json({ error: "Erro ao gravar dados na tabela Adiministrador!"});
-                };
-            }
-
-            // Verificar se tipo de usuário e usuário Profissinal de Saúde e se os compos obrigatorios estão preenchido
-            else if (typeUser === userProfessinal) {
-                if (!data.crm || !data.typeProfessional) {
-                   return res.status(400).json({ error: "Compos obrigatórios apreencher!" });
-                }
-                try {
-                    console.log("tentou gravar");
-                    console.log(userId, data.typeProfessional, data.specialy, data.crm);
-                    await connct.execute(
-                        `INSERT INTO health_professional (userId, typeProfessional, specialty, crm) VALUES (?,?,?,?)`,
-                        [userId, data.typeProfessional, data.specialty, data.crm]
-                    );
-                 } catch (err) {
-                    return res.status(400).json({ error: "Erro ao gravar dados na tabela Profissional!"});
-                };
-            } 
         }
-        
+
+        // Função gerar senha temporaria
+        async function generateTempPassword(length = 12) {
+            const buf = crypto.randomBytes(Math.ceil(length * 0.75));
+            return buf.toString("base64")
+                .replace(/\+/g, "0")
+                .replace(/\//g, "0")
+                .slice(0, length);
+        }
+
+        // Método para criptografia da senha
+        async function hashPassword(password) {
+            try {
+                const hash = await bcrypt.hash(password, 10);
+                return hash
+
+            } catch (err) {
+                return err;
+            };
+        }
+
+        // Chama a funçao para gerar a senha
+        const passwTemp = await generateTempPassword();
+
+        console.log(passwTemp);
+
+        // Criptografar senha
+        const passwHash = await hashPassword(passwTemp);
+
+        // Validar email
+        const emailValid = await emailValidation(data.email);
+
+        // Converter dado do tipo de usuário em STRING e deixar em letre maiusculas
+        const typeUser = String(data.typeUser).toUpperCase(); 
+
+        // Instanciar classe USER
+        const user = new User(
+            data.fullName, 
+            emailValid,
+            passwHash, 
+            typeUser, 
+            data.phone
+        );
+
+        // Salva dados Genericos na tabela USUÁRIO no DB
+        await user.saveUser(conn);
+     
+        let users;
+
+        // ----------- Verifica o tipo de usuáro ---------------//
+        if (typeUser === userPatient) {
+            users = new Patient(
+                user.id,
+                data.cpf, 
+                data.gender, 
+                data.maritalStatus, 
+                data.address, 
+                data.emergencyContactName,
+                data.emergencyContactPhone,
+                data.healthPlan,
+                data.cardNumber,
+                data.dateBirth
+            );
+  
+            // Salvar dados na tabela Paciente
+            await users.savePatientData(conn);
+        }
+
+        if (typeUser === userProfessinal) {
+            console.log(
+                user.id,
+                data.registrationNumber,
+                data.specialty,
+                data.council,
+            )
+
+            users = new Professional(
+                user.id,
+                data.registrationNumber,
+                data.specialty,
+                data.council,
+            );
+
+            await users.saveProfessional(conn);
+        }
+
+        if (typeUser === userAdmin) {
+            users = new Admin(
+                user.id,
+                data.can_manage_users,
+                data.can_manage_reports,
+                data.can_manage_system,
+            );
+
+            await users.saveAdm(conn);
+        }
+ 
         // Confirma tudo
-        await connct.commit();
+        await conn.commit();
         return res.status(201).json({ message: "Usuário cadastrado com sucesso!"});
 
     } catch (err) {
+        await conn.rollback(); // desfaz todas se der erro
         return res.status(400).json({ error: "Erro ao salvar usuário!"})
+
+        } finally {
+            conn.release(); // libera conexão
     }
 };
 
+// Validação login usuário
+export const verificationEmailLogin = async (email,password) => {
+    // Verifica no banco de dados
+    const dataUser = await User.getByEmail(email);
 
+    console.log(dataUser.must_change_password);
+
+    // Verifica o retorno
+    if (dataUser.email === null) {
+        return err;
+    }
+
+    // Compara senha do input com a do banco de dados
+    const match = await bcrypt.compare(password, dataUser.passw);
+    if (!match) {
+        return;
+    }
+    return dataUser;
+}
+
+// Alteração da senha temporaria
+export const changePassword = async (req, res) => {
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        const data = req.body;
+
+        
+    } catch (err) {
+
+    }
+}

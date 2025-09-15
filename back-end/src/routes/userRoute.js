@@ -1,12 +1,16 @@
 import express from "express";
-import { createUser } from "../controllers/userController.js"
+import { createUser, changePassword } from "../controllers/userController.js"
+import { login } from "../auth/auth.js";
 
 const router = express.Router();
 
 // Rota para criar usuário 
 router.post("/user", createUser);
 
-// Rota para pegar usuário
-//router.get("/user", getUser);
+// Rota login
+router.post("/login", login);
+
+// trocar senha
+router.post("/change-password", changePassword);
 
 export default router;

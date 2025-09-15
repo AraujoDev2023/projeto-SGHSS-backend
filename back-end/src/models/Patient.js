@@ -1,40 +1,101 @@
-
+import { pool } from "../config/db.js"
 
 // Classe Paciente 
 export default class Patient {
     #userId
-    #dateBirth
-    #gender
     #cpf
-    #phone
-    #address
-    constructor({userId, dateBirth, gender, cpf, phone, address }) {
-        this.#userId = userId;
-        this.#dateBirth = dateBirth;
+    #gender
+    #maritalStatus
+    #address 
+    #emergencyContactName
+    #emergencyContactPhone
+    #healthPlan
+    #cardNumber
+    #dateBirth
+
+    constructor(
+        userId,
+        cpf, 
+        gender, 
+        maritalStatus, 
+        address, 
+        emergencyContactName,
+        emergencyContactPhone,
+        healthPlan,
+        cardNumber,
+        dateBirth
+    ) {
+        this.#userId = userId
+        this.#cpf = cpf;
         this.#gender = gender;
-        this.#cpf = cpf,
-        this.#phone = phone,
-        this.#address = address
+        this.#maritalStatus = maritalStatus;
+        this.#address = address;
+        this.#emergencyContactName = emergencyContactName;
+        this.#emergencyContactPhone = emergencyContactPhone;
+        this.#healthPlan = healthPlan;
+        this.#cardNumber = cardNumber;
+        this.#dateBirth = dateBirth;
+       
     }
 
     //Getters 
     get userId() { return this.#userId; }
-    get dateBirth() { return this.#dateBirth; }
-    get gender() { return this.#gender; }
     get cpf() { return this.#cpf; }
-    get phone() { return this.#phone; }
+    get gender() { return this.#gender; }
+    get maritalStatus() { return this.#maritalStatus; }
     get address() { return this.#address; }
+    get emergencyContactName() { return this.#emergencyContactName; }
+    get emergencyContactPhone() { return this.#emergencyContactPhone; }
+    get healthPlan() { return this.#healthPlan; }
+    get cardNumber() { return this.#cardNumber; }
+    get dateBirth() { return this.#dateBirth; }
 
-    async print() {
-        console.log(this.address);
-        console.log(this.userId);
-    }
-    async savePatient() {
-        console.log("Veio aqui save");
-        const [result] = await pool.execute(
-            `INSERT INTO patient (userId, cpf, phone, gender, address, dateBirth ) VALUES (?,?,?,?,?,?)`,
-            [this.userId, this.cpf, this.phone, this.gender, this.address, this.#dateBirth]
+    //Cria query para salvar dados paciente
+    async savePatientData(conn) {
+        await conn.query(
+            `INSERT INTO patient (
+            userId, 
+            cpf, 
+            gender, 
+            maritalStatus, 
+            address, 
+            emergencyContactName, 
+            emergencyContactPhone,
+            healthPlan,
+            cardNumber,
+            dateBirth
+            ) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+            [
+                this.userId, 
+                this.cpf, 
+                this.gender, 
+                this.maritalStatus,
+                this.address,
+                this.emergencyContactName,
+                this.emergencyContactPhone,
+                this.healthPlan,
+                this.cardNumber,
+                this.dateBirth
+            ]
         );
-        return result;
+    }
+
+    static async findByUserId(userId) {
+        const [rows] = await pool.query(
+            `SELECT 
+            patientId, 
+            userId, 
+            cpf, 
+            gender, 
+            maritalStatus, 
+            address, 
+            emergencyContactName, 
+            emergencyContactPhone,
+            healthPlan,
+            cardNumber,
+            dateBirth 
+            FROM patient WHERE userId = ?`, [userId]
+        );
+        return rows[0];
     }
 }

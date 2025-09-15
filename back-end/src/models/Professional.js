@@ -1,22 +1,52 @@
-import User from "./User.js";
+import { pool } from "../config/db.js";
 
-// Class Profissional
-export default class Professionel extends User {
-    constructor({ id, fullName, email, password, crm, specialty }) {
-        super({ id, fullName, email, password, typeUser: "PROFISSIONAL"});
-        this._crm = crm;
-        this._specialty = specialty;
+ // Class Profissional
+export default class Professionel {
+    #userId
+    #registrationNumber
+    #specialty
+    #council
+
+    constructor( userId, registrationNumber, specialty, council ) {
+        this.#userId = userId;
+        this.#registrationNumber = registrationNumber;
+        this.#specialty = specialty;
+        this.#council = council;
+
+        console.log(
+            this.#userId,
+            this.#registrationNumber,
+            this.#specialty,
+            this.#council
+        );
     }
 
     // Getters
-    get crm() { return this._crm; }
-    get specialty() { return this._specialty; }
+    get userId() { return this.#userId; }
+    get registrationNumber() { return this.#registrationNumber; }
+    get specialty() { return this.#specialty; }
+    get council() { return this.#council; }
 
-    //setter
-    set crm(value) {
-        if (!value || value.lenght < 4) {
-            throw new Error("CRM Invalido!");
-        }
-        this._crm = value; 
+    
+    async saveProfessional(conn) {
+        await conn.query(
+            `INSERT INTO health_professional (userId, registrationNumber, specialty, council) VALUES (?,?,?,?)`,
+            [this.userId, this.registrationNumber, this.specialty, this.council]
+        );
     }
-}
+
+
+    
+    static async findByUserId(userId) {
+        const [rows] = await pool.query(
+            `SELECT 
+            professionalId, 
+            userId, 
+            registrationNumber,  
+            specialty, 
+            council
+            FROM health_professional WHERE userId = ?`, [userId]
+        );
+        return rows[0];
+    }
+};
