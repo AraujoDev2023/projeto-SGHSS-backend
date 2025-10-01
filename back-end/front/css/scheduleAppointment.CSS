@@ -1,0 +1,90 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #007bff;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header button {
+  padding: 0.5rem 1rem;
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+header button:hover {
+  background: #e63946;
+}
+
+main {
+  padding: 2rem;
+}
+
+.appointment-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.appointment-section h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+form label {
+  display: block;
+  margin: 1rem 0 0.3rem;
+  font-weight: bold;
+}
+
+form input, form select, form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+form textarea {
+  resize: vertical;
+}
+
+form button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.7rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background: #0056b3;
+}
+
+#message {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: green;
+}

@@ -98,4 +98,43 @@ export default class Patient {
         );
         return rows[0];
     }
-}
+
+    //------ Método agendamento de consulta -------//
+    static async saveAppointment(appointment) {
+        try {
+            const status = "AGENDADA";
+            const [result] = await pool.query(
+            `INSERT INTO consultations
+            (patientId, professionalId, consultationDate, consultationTime, statusConsultations, notes)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                appointment.patientId, 
+                appointment.professionalId, 
+                appointment.consultationDate, 
+                appointment.consultationTime, 
+                status, 
+                appointment.notes || null
+            ]
+            );
+            return result;
+        } catch (err) {     
+            return console.log(err, "Erro ao tentar salvar no banco de dados");
+        }
+    }
+
+    //--------- Método para cancelar consulta ------//
+    static async canceledAppointment(status) {
+        console.log(status);
+        try {
+            const [result] = await pool.query(
+            `UPDATE consultations SET statusConsultations = ? WHERE consultationId = ?`,
+            [status.newStatus, status.id]
+            );
+
+            return result;
+            
+        } catch (err) {
+            return console.log(err, "Erro ao tentar alterar status da consulta");
+        }
+    }
+};

@@ -1,6 +1,5 @@
 import { pool } from '../config/db.js';
-import crypto, { hash } from 'crypto';
-import bcrypt from 'bcrypt';
+
 
 
 // Classe Usuario
@@ -62,6 +61,22 @@ export default class User {
             phone 
             FROM users WHERE email = ?`,
             [email]
+        );
+        return rows[0] || null;
+    }
+
+    static async getById(userId) {
+        const [rows] = await pool.query(
+            `SELECT
+            userId, 
+            fullName, 
+            email, 
+            passw, 
+            typeUser, 
+            must_change_password, 
+            phone 
+            FROM users WHERE userId = ?`,
+            [userId]
         );
         return rows[0] || null;
     }

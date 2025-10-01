@@ -1,11 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SGHSS</title>
+  <link rel="stylesheet" href="../css/home.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Home</h1>
+  <!-- Header -->
+  <header>
+    <h1>VidaPlus</h1>
+    <div class="user-info">
+      <span id="userName"></span>
+      <button id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">VidaPlus</div>
+    <ul id="mainMenu" class="nav-links"></ul>
+  </nav>
+
+  <!-- Section Início -->
+  <section id="inícioSection" class="page-section active">
+    <!-- Slider -->
+    <div class="slider">
+      <div class="slide"> <img src="../img/Untitled design (1).png" alt="Slide 3"> </div>
+      <button id="prevSlide" class="slider-btn">❮</button>
+      <button id="nextSlide" class="slider-btn">❯</button>
+    </div>
+
+    <!-- Notícias -->
+    <div id="newsContainer" class="news"></div>
+  </section>
+
+  <!-- Section Consultas -->
+  <section id="consultasSection" class="page-section">
+    <div class="containerTitleBtn">
+      <h2>Consultas</h2>
+      <button id="btnSchedule" class="btn-primary">Agendar Consulta</button>
+    </div>
+    
+    <div id="cardsContainer"></div>
+  </section>
+
+  <!-- Section Exames -->
+  <section id="examesSection" class="page-section">
+    <h2>Exames</h2>
+    <div id="examsCard"></div>
+  </section>
+
+  <!-- Section Prontuário (só aparece para PROFISSIONAL) -->
+  <section id="prontuarioSection" class="page-section">
+    <h2>Prontuário</h2>
+    <div id="recordsContainer"></div>
+  </section>
+
+  <section id="usuáriosSection" class="page-section">
+    <h2>Usuários</h2>
+    <div id="usersContainer"></div>
+  </section>
+
+
+  <!-- Section Perfil -->
+  <section id="perfilSection" class="page-section">
+    <h2>Perfil do Usuário</h2>
+    <p>Aqui você pode atualizar suas informações de perfil.</p>
+  </section>
+
+  <script src="../files.js/home.js"></script>
 </body>
 </html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendar Consulta - SGHSS</title>
+  <link rel="stylesheet" href="../css/scheduleAppointment.css">
+</head>
+<body>
+  <header>
+    <h1>SGHSS - Agendamento de Consulta</h1>
+    <button id="logoutBtn">Sair</button>
+  </header>
+
+  <main>
+    <section class="appointment-section">
+      <h2>Agendar Consulta</h2>
+
+      <form id="scheduleAppointment">
+        <label for="professionalId">Profissional:</label>
+        <select id="professionalId" required>
+          <option value="">Selecione</option>
+        </select>
+
+        <label for="consultationDate">Data:</label>
+        <input type="date" id="consultationDate" required>
+
+        <label for="consultationTime">Hora:</label>
+        <input type="time" id="consultationTime" required>
+        
+
+        <button type="submit">Agendar Consulta</button>
+      </form>
+
+      <div id="message"></div>
+    </section>
+  </main>
+
+  <script src="../files.js/scheduleAppointment.js"></script>
+</body>
+</html>

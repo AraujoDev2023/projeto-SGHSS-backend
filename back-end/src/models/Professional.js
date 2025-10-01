@@ -49,4 +49,37 @@ export default class Professionel {
         );
         return rows[0];
     }
+
+    static async listAppointment(professionalId) {
+        try {
+            const [rows] = await pool.query(
+            `SELECT 
+                c.consultationId,
+                c.consultationDate,
+                c.consultationTime,
+                c.statusConsultations,
+                c.notes,
+                u.fullName AS patientName
+            FROM consultations c
+            JOIN patient p 
+                ON c.patientId = p.patientId
+            JOIN users u 
+                ON p.userId = u.userId
+            WHERE c.professionalId = ?`,
+            [professionalId]
+            );
+            return rows;
+        } catch (err) {
+            return err
+        }
+    }
+
+    static async canceledAppointment(consultationId) {
+        await pool.query(
+        `UPDATE consultations 
+        SET statusConsultations = 'CANCELADA' 
+        WHERE consultationId = ?`,
+        [consultationId]
+        );
+    }
 };
