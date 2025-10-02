@@ -186,7 +186,7 @@ export const scheduleAppointment = async (req, res) => {
       );
     }
 
-    // Evita conflito: já existe uma consulta não cancelada nesse horário para o profissional?
+    // Evita conflito
     const [existing] = await pool.query(
       `SELECT consultationId, statusConsultations FROM consultations
        WHERE professionalId = ? AND consultationDate = ? AND consultationTime = ? 
